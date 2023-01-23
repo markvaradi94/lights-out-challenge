@@ -43,7 +43,7 @@ public class GameSolver {
                 .map(this::getLastMoveFromQueue)
                 .toList();
 
-        List<QueItem> completedBoardItems = lastMoveItems.parallelStream()
+        List<QueItem> completedBoardItems = lastMoveItems.stream()
                 .filter(this::checkGameIsFinished)
                 .toList();
 
@@ -70,10 +70,6 @@ public class GameSolver {
                 .solutionCount(SOLUTIONS_COUNT++)
                 .solutionItems(solutionItems)
                 .build();
-    }
-
-    private static void removeInitialBoardPosition(GameQueue<QueItem> queue) {
-        queue.poll();
     }
 
     private GameQueue<QueItem> findQueueForCompletedItem(QueItem item, List<GameQueue<QueItem>> queues) {
@@ -151,8 +147,6 @@ public class GameSolver {
                     .flatMap(Collection::stream)
                     .toList();
 
-            gameMap.put(piece.pieceNumber(), newQueues);
-
             if (piece.pieceNumber() == game.gamePieces().size()) {
                 newQueues.stream()
                         .filter(this::checkIfQueueIsCorrectSolution)
@@ -166,7 +160,7 @@ public class GameSolver {
 
     private List<GameQueue<QueItem>> createQueuesForPiece(GamePiece piece, VirtualBoard virtualBoard) {
         List<VirtualBoard> modifiedBoards = moveBuilder.createVirtualBoardsForPieceOnBoard(piece, virtualBoard);
-        List<QueItem> queueItems = modifiedBoards.stream()
+        List<QueItem> queueItems = modifiedBoards.parallelStream()
                 .map(board -> QueItem.builder()
                         .pieceNumber(board.pieceNumber())
                         .position(board.position())
@@ -190,7 +184,7 @@ public class GameSolver {
 
     private boolean checkIfQueueIsCorrectSolution(GameQueue<QueItem> queue) {
         if (queue.getMoves().size() - 1 == game.gamePieces().size()) {
-            QueItem lastItem = queue.getMoves().get(game.gamePieces().size() - 1);
+            QueItem lastItem = queue.getMoves().get(game.gamePieces().size());
             return lastItem.checkBoardIsCompleted();
         }
         return false;
@@ -216,7 +210,6 @@ public class GameSolver {
         items.stream()
                 .sorted(comparingInt(QueItem::pieceNumber))
                 .forEachOrdered(queue::offer);
-
         return queue;
     }
 
@@ -230,5 +223,9 @@ public class GameSolver {
 
     private List<GameQueue<QueItem>> getLastLevelQueues() {
         return gameMap.get(game.gamePieces().size());
+    }
+
+    private static void removeInitialBoardPosition(GameQueue<QueItem> queue) {
+        queue.poll();
     }
 }

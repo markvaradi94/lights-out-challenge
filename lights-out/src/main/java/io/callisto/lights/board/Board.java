@@ -23,17 +23,6 @@ public record Board(
         return (Board) super.clone();
     }
 
-    public boolean boardIsComplete() {
-        for (int i = 0; i < valueMatrix.length; i++) {
-            for (int j = 0; j < valueMatrix[i].length; j++) {
-                if (valueMatrix[i][j] != 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     public Board applyPieceOnBoard(GamePiece piece) {
         return applyPieceToBoard(piece.value());
     }

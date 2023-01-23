@@ -19,6 +19,13 @@ public record QueItem(
 ) {
 
     public boolean checkBoardIsCompleted() {
-        return modifiedBoard.board().boardIsComplete();
+        for (int i = 0; i < modifiedMatrix.length; i++) {
+            for (int j = 0; j < modifiedMatrix[i].length; j++) {
+                if (modifiedMatrix[i][j] != 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
