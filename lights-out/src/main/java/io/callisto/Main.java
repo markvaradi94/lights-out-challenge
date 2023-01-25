@@ -7,12 +7,12 @@ import io.callisto.lights.util.InputReader;
 public class Main {
     public static void main(String[] args) {
         var reader = new InputReader();
-        Game game1 = reader.readGame("src/main/resources/samples/01.txt");
+        Game game1 = reader.readGame("lights-out/src/main/resources/samples/01.txt");
         GameSolver solver1 = new GameSolver(game1);
         solver1.printGameSolution();
         System.out.println();
 
-        Game game2 = reader.readGame("src/main/resources/samples/02.txt");
+        Game game2 = reader.readGame("lights-out/src/main/resources/samples/02.txt");
         GameSolver solver2 = new GameSolver(game2);
         solver2.printGameSolution();
 

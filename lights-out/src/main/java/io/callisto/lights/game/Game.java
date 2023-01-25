@@ -14,6 +14,6 @@ public record Game(
         String outputFile
 ) {
     public Game {
-        outputFile = "src/main/resources/solutions/" + outputFile;
+        outputFile = "lights-out/src/main/resources/solutions/" + outputFile;
     }
 }
