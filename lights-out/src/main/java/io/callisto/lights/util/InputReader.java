@@ -43,9 +43,11 @@ public class InputReader {
 
     private List<GamePiece> buildGamePiecesFromStructure(String piecesStructure) {
         String[] tokens = piecesStructure.split(" ");
-        return Arrays.stream(tokens)
+        List<GamePiece> gamePieces = Arrays.stream(tokens)
                 .map(this::toGamePiece)
                 .toList();
+        PIECE_COUNT = 1;
+        return gamePieces;
     }
 
     private GamePiece toGamePiece(String token) {

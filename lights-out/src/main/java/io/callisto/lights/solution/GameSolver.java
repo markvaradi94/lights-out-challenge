@@ -37,7 +37,7 @@ public class GameSolver {
         gameMap = mapGameMoves();
         List<PermutationsQueue<BoardPermutation>> queues = getLastLevelQueues();
         List<BoardPermutation> lastMoveItems = queues.stream()
-                .map(this::getLastMoveFromQueue)
+                .map(this::getLastPermutationFromQueue)
                 .toList();
 
         List<BoardPermutation> completedBoardItems = lastMoveItems.stream()
@@ -80,8 +80,11 @@ public class GameSolver {
         return item.checkPermutationIsCorrectSolution();
     }
 
-    private BoardPermutation getLastMoveFromQueue(PermutationsQueue<BoardPermutation> queue) {
-        return queue.getPermutations().get(game.gamePieces().size());
+    private BoardPermutation getLastPermutationFromQueue(PermutationsQueue<BoardPermutation> queue) {
+        return queue.getPermutations().stream()
+                .filter(perm -> perm.pieceNumber() == game.gamePieces().size())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Could not find last permutation"));
     }
 
     private Map<Integer, List<PermutationsQueue<BoardPermutation>>> mapGameMoves() {
@@ -99,56 +102,64 @@ public class GameSolver {
         gameMap.put(0, singletonList(permutationsQueue));
         game.gamePieces().stream()
                 .sorted(comparingInt(GamePiece::pieceNumber))
-                .forEachOrdered(this::putMovesOnMap);
+                .forEachOrdered(this::putPermutationsOnMap);
 
         return gameMap;
     }
 
-    private void putMovesOnMap(GamePiece piece) {
+    private void putPermutationsOnMap(GamePiece piece) {
         if (piece.pieceNumber() == 1) {
-            List<VirtualBoard> firstPieceBoards = createVirtualBoardsForPieceOnBoard(piece, getInitialBoard());
-            List<BoardPermutation> boardPermutations = firstPieceBoards.stream()
-                    .map(board -> BoardPermutation.builder()
-                            .pieceNumber(board.pieceNumber())
-                            .position(board.position())
-                            .move(board.move())
-                            .initialBoard(getInitialBoard())
-                            .modifiedBoard(board)
-                            .build())
-                    .toList();
-
-            BoardPermutation firstItem = gameMap.get(0).stream()
-                    .findFirst()
-                    .map(PermutationsQueue::peek)
-                    .orElseThrow(() -> new RuntimeException("Could not find route start"));
-
-            List<PermutationsQueue<BoardPermutation>> permutationsQueues = boardPermutations.stream()
-                    .map(item -> createNewQueue(List.of(firstItem, item)))
-                    .toList();
-
-            gameMap.put(piece.pieceNumber(), permutationsQueues);
+            putFirstGamePieceQueuesOnMap(piece);
         } else {
-            List<VirtualBoard> boardsForNextMove = gameMap.get(piece.pieceNumber() - 1).parallelStream()
-                    .flatMap(Collection::stream)
-                    .filter(Objects::nonNull)
-                    .filter(item -> item.pieceNumber() == piece.pieceNumber() - 1)
-                    .map(BoardPermutation::modifiedBoard)
-                    .map(board -> board.withDepth(game.board().depth()))
-                    .toList();
+            putNewlyCreatedQueuesOnMap(piece);
+        }
+    }
 
-            List<PermutationsQueue<BoardPermutation>> newQueues = boardsForNextMove.stream()
-                    .map(board -> createQueuesForPiece(piece, board))
-                    .flatMap(Collection::stream)
-                    .toList();
+    private void putFirstGamePieceQueuesOnMap(GamePiece piece) {
+        List<VirtualBoard> firstPieceBoards = createVirtualBoardsForPieceOnBoard(piece, getInitialBoard());
+        List<BoardPermutation> boardPermutations = firstPieceBoards.stream()
+                .map(board -> BoardPermutation.builder()
+                        .pieceNumber(board.pieceNumber())
+                        .position(board.position())
+                        .move(board.move())
+                        .initialBoard(getInitialBoard())
+                        .modifiedBoard(board)
+                        .build())
+                .toList();
 
-            if (piece.pieceNumber() == game.gamePieces().size()) {
-                newQueues.stream()
-                        .filter(this::checkIfQueueIsCorrectSolution)
-                        .findFirst()
-                        .ifPresent(solvedQueue -> gameMap.put(piece.pieceNumber(), singletonList(solvedQueue)));
-            } else {
-                gameMap.put(piece.pieceNumber(), newQueues);
-            }
+        BoardPermutation firstItem = gameMap.get(0).stream()
+                .findFirst()
+                .map(PermutationsQueue::peek)
+                .orElseThrow(() -> new RuntimeException("Could not find first permutation"));
+
+        List<PermutationsQueue<BoardPermutation>> permutationsQueues = boardPermutations.stream()
+                .map(item -> createNewQueue(List.of(firstItem, item)))
+                .toList();
+
+        gameMap.put(piece.pieceNumber(), permutationsQueues);
+    }
+
+    private void putNewlyCreatedQueuesOnMap(GamePiece piece) {
+        List<VirtualBoard> boardsForNextMove = gameMap.get(piece.pieceNumber() - 1).parallelStream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(item -> item.pieceNumber() == piece.pieceNumber() - 1)
+                .map(BoardPermutation::modifiedBoard)
+                .map(board -> board.withDepth(game.board().depth()))
+                .toList();
+
+        List<PermutationsQueue<BoardPermutation>> newQueues = boardsForNextMove.stream()
+                .map(board -> createQueuesForPiece(piece, board))
+                .flatMap(Collection::stream)
+                .toList();
+
+        if (piece.pieceNumber() == game.gamePieces().size()) {
+            newQueues.stream()
+                    .filter(this::checkIfQueueIsCorrectSolution)
+                    .findFirst()
+                    .ifPresent(solvedQueue -> gameMap.put(piece.pieceNumber(), singletonList(solvedQueue)));
+        } else {
+            gameMap.put(piece.pieceNumber(), newQueues);
         }
     }
 
@@ -216,5 +227,10 @@ public class GameSolver {
 
     private static void removeInitialBoardPosition(PermutationsQueue<BoardPermutation> queue) {
         queue.poll();
+    }
+
+    @Override
+    public String toString() {
+        return this.solution().toString();
     }
 }
