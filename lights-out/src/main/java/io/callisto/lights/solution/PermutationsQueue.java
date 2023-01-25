@@ -1,4 +1,4 @@
-package io.callisto.lights.util;
+package io.callisto.lights.solution;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,39 +11,33 @@ import java.util.LinkedList;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class GameQueue<T> extends AbstractQueue<T> {
-    private LinkedList<T> moves;
+public class PermutationsQueue<T> extends AbstractQueue<T> {
+    private LinkedList<T> permutations;
 
-    public GameQueue() {
-        this.moves = new LinkedList<T>();
+    public PermutationsQueue() {
+        this.permutations = new LinkedList<T>();
     }
 
     @Override
     public Iterator<T> iterator() {
-        return moves.iterator();
+        return permutations.iterator();
     }
 
     @Override
     public int size() {
-        return moves.size();
+        return permutations.size();
     }
 
     @Override
     public boolean offer(T t) {
         if (t == null) return false;
-        moves.add(t);
+        permutations.add(t);
         return true;
-    }
-
-    public GameQueue<T> offerAndReturn(T t) {
-        if (t == null) return null;
-        moves.add(t);
-        return this;
     }
 
     @Override
     public T poll() {
-        Iterator<T> iter = moves.iterator();
+        Iterator<T> iter = permutations.iterator();
         T t = iter.next();
         if (t != null) {
             iter.remove();
@@ -54,6 +48,6 @@ public class GameQueue<T> extends AbstractQueue<T> {
 
     @Override
     public T peek() {
-        return moves.getFirst();
+        return permutations.getFirst();
     }
 }

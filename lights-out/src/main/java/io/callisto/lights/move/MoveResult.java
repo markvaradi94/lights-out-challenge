@@ -1,4 +1,4 @@
-package io.callisto.lights.solver;
+package io.callisto.lights.move;
 
 import io.callisto.lights.board.BoardElement;
 import lombok.Builder;
@@ -14,7 +14,4 @@ public record MoveResult(
         List<BoardElement> elements,
         int[][] matrix
 ) {
-    public void updateElements() {
-        elements.forEach(elem -> elem.setValue(matrix[elem.row()][elem.column()]));
-    }
 }

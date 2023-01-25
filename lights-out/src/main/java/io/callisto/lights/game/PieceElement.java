@@ -1,6 +1,6 @@
-package io.callisto.lights.board;
+package io.callisto.lights.game;
 
-import io.callisto.lights.solver.Position;
+import io.callisto.lights.move.Position;
 import lombok.*;
 
 @Data

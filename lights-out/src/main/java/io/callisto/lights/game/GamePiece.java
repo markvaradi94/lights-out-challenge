@@ -1,4 +1,4 @@
-package io.callisto.lights.board;
+package io.callisto.lights.game;
 
 import lombok.Builder;
 import lombok.With;

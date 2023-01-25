@@ -1,6 +1,9 @@
 package io.callisto.lights.util;
 
 import io.callisto.lights.board.*;
+import io.callisto.lights.game.Game;
+import io.callisto.lights.game.GamePiece;
+import io.callisto.lights.game.PieceElement;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -29,7 +32,7 @@ public class InputReader {
         String boardStructure = input.get(1);
         String piecesStructure = input.get(2);
 
-        Board board = buildBoardFromStructure(depth, boardStructure);
+        var board = buildBoardFromStructure(depth, boardStructure);
         var gamePieces = buildGamePiecesFromStructure(piecesStructure);
         return Game.builder()
                 .board(board)
@@ -40,9 +43,11 @@ public class InputReader {
 
     private List<GamePiece> buildGamePiecesFromStructure(String piecesStructure) {
         String[] tokens = piecesStructure.split(" ");
-        return Arrays.stream(tokens)
+        List<GamePiece> gamePieces = Arrays.stream(tokens)
                 .map(this::toGamePiece)
                 .toList();
+        PIECE_COUNT = 1;
+        return gamePieces;
     }
 
     private GamePiece toGamePiece(String token) {
@@ -105,7 +110,6 @@ public class InputReader {
     private List<BoardElement> toBoardElements(Map.Entry<Integer, List<String>> entry) {
         AtomicInteger count = new AtomicInteger();
         List<Integer> rowValues = toListOfIntegerValues(entry.getValue());
-
         return rowValues.stream()
                 .map(val -> BoardElement.builder()
                         .row(entry.getKey())
